@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request, HTTPException
 from app.parser.parser import parse_request
 from app.cache.fingerprint import generate_fingerprint
 from app.cache.cache_manager import is_cached, add_to_cache
+from app.forwarder.forwarder import forward_request
 
 from security.rules.rule_engine import inspect
 from app.decision.decision_engine import evaluate
@@ -56,9 +57,12 @@ async def login(request: Request):
     # Cache only safe requests
     add_to_cache(fingerprint)
 
-    return {
-        "message": decision.message
-    }
+    body = await request.body()
+
+    return await forward_request(
+      body=body,
+      headers=request.headers
+    ) 
 
 
 if __name__ == "__main__":
