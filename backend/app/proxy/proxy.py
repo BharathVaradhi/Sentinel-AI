@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, HTTPException
-
+from app.logger.log_entry import LogEntry
+from app.logger.logger import save_log
 from app.parser.parser import parse_request
 from app.cache.fingerprint import generate_fingerprint
 from app.cache.cache_manager import is_cached, add_to_cache
@@ -45,14 +46,36 @@ async def login(request: Request):
     decision = evaluate(rule_result)
 
     if not decision.allow:
-        print("\n🚨 REQUEST BLOCKED 🚨\n")
+     print("\n🚨 REQUEST BLOCKED 🚨\n")
+     entry = LogEntry(
+        timestamp=request_data.timestamp,
+         ip=request_data.ip,
+        method=request_data.method,
+        url=request_data.url,
+       attack=rule_result.attack_type,
+       decision="BLOCKED",
+       severity=rule_result.severity,
+        )
 
-        raise HTTPException(
+     save_log(entry)
+
+     raise HTTPException(
             status_code=decision.status_code,
             detail=decision.message
         )
 
     print("\n✅ REQUEST ALLOWED\n")
+    entry = LogEntry(
+     timestamp=request_data.timestamp,
+     ip=request_data.ip,
+     method=request_data.method,
+     url=request_data.url,
+     attack="None",
+     decision="ALLOWED",
+     severity="None",
+    )
+
+    save_log(entry)
 
     # Cache only safe requests
     add_to_cache(fingerprint)
