@@ -1,9 +1,15 @@
-cache_store = {}
+from app.config.redis_config import redis_client
+
+CACHE_EXPIRY = 300  # 5 minutes
 
 
 def is_cached(fingerprint: str) -> bool:
-    return fingerprint in cache_store
+    return redis_client.exists(fingerprint) == 1
 
 
 def add_to_cache(fingerprint: str):
-    cache_store[fingerprint] = True
+    redis_client.setex(
+        fingerprint,
+        CACHE_EXPIRY,
+        "SAFE"
+    )
