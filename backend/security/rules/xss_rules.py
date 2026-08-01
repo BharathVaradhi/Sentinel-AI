@@ -1,5 +1,5 @@
 import re
-
+from security.normalizer import normalize
 from app.parser.request_model import RequestData
 from .rule_result import RuleResult
 
@@ -17,7 +17,8 @@ XSS_PATTERNS = [
 
 def check_xss(request: RequestData) -> RuleResult:
 
-    body = request.body.lower()
+    body = normalize(request.body)
+    print(f"Normalized Body: {body}")
 
     for pattern in XSS_PATTERNS:
         if re.search(pattern, body):

@@ -1,5 +1,5 @@
 from app.parser.request_model import RequestData
-
+from security.normalizer import normalize
 from .rule_result import RuleResult
 
 
@@ -15,10 +15,10 @@ SQL_PATTERNS = [
 
 def check_sql_injection(request: RequestData) -> RuleResult:
 
-    body = request.body.upper()
+    body = normalize(request.body)
 
     for pattern in SQL_PATTERNS:
-        if pattern.upper() in body:
+        if pattern.lower() in body:
             return RuleResult(
                 matched=True,
                 attack_type="SQL Injection",

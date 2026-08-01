@@ -2,7 +2,7 @@ import re
 
 from app.parser.request_model import RequestData
 from .rule_result import RuleResult
-
+from security.normalizer import normalize
 
 COMMAND_PATTERNS = [
     r";\s*\w+",
@@ -15,7 +15,7 @@ COMMAND_PATTERNS = [
 
 def check_command_injection(request: RequestData) -> RuleResult:
 
-    body = request.body.lower()
+    body = normalize(request.body)
 
     for pattern in COMMAND_PATTERNS:
         if re.search(pattern, body):

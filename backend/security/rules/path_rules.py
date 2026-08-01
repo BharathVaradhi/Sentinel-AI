@@ -2,7 +2,7 @@ import re
 
 from app.parser.request_model import RequestData
 from .rule_result import RuleResult
-
+from security.normalizer import normalize
 
 PATH_PATTERNS = [
     r"\.\./",
@@ -15,7 +15,7 @@ PATH_PATTERNS = [
 
 def check_path_traversal(request: RequestData) -> RuleResult:
 
-    body = request.body.lower()
+    body = normalize(request.body)
 
     for pattern in PATH_PATTERNS:
         if re.search(pattern, body):
